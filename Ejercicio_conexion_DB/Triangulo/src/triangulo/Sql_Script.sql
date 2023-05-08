@@ -17,4 +17,12 @@ insert into triangulo(base,altura) values(13.4,5.1);
 insert into triangulo(base,altura) values(8.1,6.2);
 insert into triangulo(base,altura) values(7.3,2.2);
 
-select * from triangulo;
+
+DROP PROCEDURE IF EXISTS insertar; -- Si existe procedimiento, lo borro.
+
+DELIMITER / -- Esto es para que no de el coñazo con los puntos y comas.
+CREATE PROCEDURE insertar(baseP DOUBLE,alturaP DOUBLE) -- Procedimiento almacenado, es como una función, le paso la Base y la Altura.
+BEGIN
+	INSERT INTO triangulo(base,altura) values(baseP,alturaP); -- Inserto la base y la altura pasadas por parámetro.
+	SELECT * FROM triangulo; -- Devuelvo todos los registros de la tabla.
+END;

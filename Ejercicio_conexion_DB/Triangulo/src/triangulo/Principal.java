@@ -4,8 +4,6 @@
  */
 package triangulo;
 
-import java.util.Scanner;
-
 /**
  *
  * @author Curso Tarde
@@ -18,11 +16,11 @@ public class Principal {
     public static void main(String[] args) {
         // TODO code application logic here
 
-        Conexion c=new Conexion("bd_geometria", "root", "");
-        
-        System.out.print(c.getMsgError());
-        c.insert();
-        c.finalize();
+        Consulta c= new Consulta("bd_geometria", "root", "");
+        if(!c.procedureInsert(156, 257.22)){
+            
+            System.out.println(c.getMsgError());
+        }
     }
 
 }

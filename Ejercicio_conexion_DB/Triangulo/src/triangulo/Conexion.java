@@ -2,122 +2,111 @@ package triangulo;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class Conexion {
-	
-	private Connection con=null;
-	private String msgError=null;
-	
+/**
+ * Clase principal de conexión a Base de Datos.
+ * @author Marcos
+ */
+public  class Conexion {
 
-	public String getMsgError() {
-		return msgError;
-	}
+    private Connection con = null; //Conexión con Base de Datos.
+    private String msgError = null; //Mensaje de error.
 
-	public Conexion(String db,String user,String pass) {
-		
-		conectar(db,user,pass);
-	}
-	
-	public boolean isOpen() {
-		
-		try {
-			
-			boolean ret=false; 
-			
-			if(this.con!=null) {
-				
-				ret=this.con.isValid(3);
-			}
-			return ret;
-		}
-		catch(SQLException e) {
-			
-			this.msgError=e.getMessage();
-			return false;
-		}
-		
-	}
-	
-	public String consulta() {
-		
-		try {
-			
-			PreparedStatement ps=this.con.prepareStatement("select * from triangulo");
-			ResultSet rs=ps.executeQuery();
-			StringBuilder sb=new StringBuilder();
-			
-			while(rs.next()) {
-				
-				sb.append(" Id:" + rs.getString(1));
-				sb.append(" base:" + rs.getString(2));
-                                sb.append(" altura:" + rs.getString(3));
-				sb.append("\n");
-			}
+    /**
+     * Devolución del error
+     * @return Mensaje de error.
+     */
+    public String getMsgError() {
+        return msgError;
+    }
 
-			return sb.toString();
-		}
-		catch(SQLException e) {
-			
-			this.msgError=e.getMessage();
-			return null;
-		}
-	}
-        
-        public boolean insert(){
-        
-            try {
-			
-			PreparedStatement ps=this.con.prepareStatement("insert into triangulo(base,altura) values (?,?)");
-                        ps.setDouble(1,0.25);
-                        ps.setDouble(2,0.59);
-			if(ps.executeUpdate()==0){
-                            
-                            throw new SQLException("No se ha establecido conexión");
-                        }
-			return true;
-		}
-		catch(SQLException e) {
-			
-			this.msgError=e.getMessage();
-			return false;
-		}
+    /**
+     * Captura del mensaje de error, es protegido porque se utiliza en la clase hija.
+     * @param err  Mensaje de error.
+     */
+    protected void setMsgError(String err) {
+        this.msgError=err;
+    }
+    
+    //Devolución de la conexión, es protegido porque se utiliza en la clase hija
+    protected Connection getCon() {
+        return this.con;
+    }
+
+    /**
+     * Constructor.
+     * @param db Nombre de la Base de Datos.
+     * @param user Usuario con el que te vas a conectar.
+     * @param pass Contraseña de la Base de Datos.
+     */
+    public Conexion(String db, String user, String pass) {
+
+        conectar(db, user, pass);
+    }
+
+    /**
+     * Devolución del estado de la conexión. Protected ya que es para uso interno.
+     * @return Si está abierta la conexión.
+     */
+    protected boolean isOpen() {
+
+        try {
+
+            boolean ret = false;
+
+            if (this.con != null) { //Si conexión no es null.
+
+                ret = this.con.isValid(3); //Si conexión está abierta: True, si no False.
+            }
+            return ret; //Devolución de la conexión.
+        } catch (SQLException e) {
+
+            this.msgError = e.getMessage(); //Si error, capturo el mensaje de error y lo asigno.
+            return false; //Devuelvo falso.
         }
-	
-	private void conectar(String db,String user,String pass) {
-		
-		try {
-			
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			String cadenaCon = "jdbc:mysql://localhost/" + db;
-			this.con = DriverManager.getConnection(cadenaCon,user,pass);
 
-		} catch (ClassNotFoundException e) {
-			
-			this.msgError=e.getMessage();
-		} catch (SQLException e) {
-			
-			this.msgError=e.getMessage();
-		}
-	}
-	
-	@Override
-	protected void finalize() {
-		
-		try {
-			
-			if(isOpen()==true) {
-				
-				this.con.close();
-			}
-		}
-		catch(SQLException e) {
-			
-			this.msgError=e.getMessage();
-		}
-	}
-	
+    }
+
+    /**
+     * Conexión con Base de Datos.
+     * @param db Nombre de la Base de Datos.
+     * @param user Usuario que se va a conectar.
+     * @param pass  Contraseña.
+     */
+    private void conectar(String db, String user, String pass) {
+
+        try {
+
+            Class.forName("com.mysql.cj.jdbc.Driver"); //Establezco el Driver.
+            String cadenaCon = "jdbc:mysql://localhost/" + db; //Establezco la cadena de conexión.
+            this.con = DriverManager.getConnection(cadenaCon, user, pass); //Establezco la conexión.
+
+        } catch (ClassNotFoundException e) { //Captura de la excepción, si no se encuentra el Class.forName.
+
+            this.msgError = e.getMessage(); //Capturo el mensaje de error.
+        } catch (SQLException e) { //Captura de errores de SQL.
+
+            this.msgError = e.getMessage(); //Captura del error.
+        }
+    }
+
+    /**
+     * Destructor de la clase
+     */
+    @Override
+    protected  void finalize()
+    {
+        try {
+
+            if (isOpen() == true) { //Si conexión abierta.
+
+                this.con.close(); //La cierro.
+            }
+        } catch (SQLException e) { //Captura del mensaje de error de SQL.
+
+            this.msgError = e.getMessage(); //Captura del error
+        }
+    }
 
 }
